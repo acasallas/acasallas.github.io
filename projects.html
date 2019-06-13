@@ -46,6 +46,15 @@
       </div>
     </nav>
 
+    <style>
+  .projectimg {
+    display: inline;
+    float:left;
+    padding:10px;
+    border-radius:10%;
+  }
+</style>
+
     <!-- Page Header -->
     <header class="masthead" style="background-color: white">
       <div class="overlay"></div>
@@ -54,12 +63,41 @@
           <div class="col-lg-8 col-md-10 mx-auto">
             <div class="page-heading">
               <h1>Projects</h1>
-              <span class="subheading">I've worked on a lot of projects, but haven't uploaded them yet. Check out my LinkedIn link below for a summary of things I've worked on.</span>
+              <span class="subheading">I have worked on several projects involving the fields of Computer Science, Electrical Engineering, and Mechanical Engineering.</span>
             </div>
           </div>
         </div>
       </div>
     </header>
+
+    <div class="col-lg-8 col-md-10 mx-auto">
+    <h2>Contactless Current and Voltage Detector</h2>
+    <img src="ccspic.png" height="200" class="projectimg"></img>
+    <span>For my Master's in Engineering thesis project at MIT, I developed a contactless current and voltage detector. The current detector used an array of magnetic field point measurements, rather than a hall effect sensor, to reduce hardware cost. I developed algorithms to deal with magnetic field interference from nearby wires, effectively replacing the hardware of a hall effect sensor with interference-rejection algorithms. I used techniques such as Polynomial Regression, Best Linear Unbiased Estimators, Neural Networks, and Digital Signal Processing.
+    </span>
+    <hr>
+    <h2>Electric Bicycle Motor Controller</h2>
+    <img src="electricbicycle.png" height="180" class="projectimg"></img>
+    <span>For my 6.101 (Analog Electronics) final project, I designed an electric bicycle speed controller with regenerative braking. I worked with a teammate, Benjamin Gutierrez. We used a BLDC motor and a trapezoidal commutation scheme using 6 MOSFETs. By controlling the MOSFETs with a system of logic gates, our controller was capable of both driving the motor and redirecting energy to the battery during braking (regenerative braking). In this project we built several boost converters, buck converters, logic circuits, and other electronic circuits.</span>
+        <hr>
+    <h2>Relay Racecar</h2>
+    <img src="racecarpic.png" height="180" class="projectimg"></img>
+    <span>For my 2.810 (Manufacturing) final project, I worked in a team to fabricate six small racecars to participate in a relay race competition. I was in charge of designing the steering mechanism. We used machines such as a mill, a lathe, a waterjet, and an injection molder to fabricate six units of identical design. Emphasis was placed on designing the cars in a way that would allow for mass production. We placed fourth in the final competition.</span>
+        <hr>
+    <h2>OCR System</h2>
+    <img src="ocrpic.png" height="180" class="projectimg"></img>
+    <span>For my 6.869 (Computer Vision) final project, I designed an Optical Character Recognition system. I worked with a partner, Andrew Montanez. In this project, we trained a neural net to classify an image as a letter. To isolate letters in an image, we used edge-detection techniques with the help of the OpenCV library. Once a potential letter was isolated, we used the trained neural net model to perform the classification task and displayed the results graphically using TKinter</span>
+        <hr>
+    <h2>MASLAB Robot</h2>
+    <img src="maslabpic.png" height="180" class="projectimg"></img>
+    <span>I competed in the January 2015 MIT MASLAB Robotics competition. With two teammates, I built an autonomous robot designed to participate in a competition which involved picking up red and green blocks from a playing field and depositing them in a target area. The robot was built using MDF and laser cutting, and was designed in Solidworks. We used the OpenCV library to process a webcam feed to enable the robot to autonomously locate and pick up the blocks on the field.</span>
+        <hr>
+    <h2>Pole-Climbing Robot</h2>
+    <img src="poleclimbingrobot.jpg" height="180" class="projectimg"></img>
+    <span>As part of the MIT Class 2.007 (Design and Manufacturing), I designed and built a remote-controlled robot to perform various tasks in a field, including pulling levers and moving sand bags. The robot was built out of aluminum plates and I used several machine shop tools, including a mill and lathe, to construct the robot. I was also required to perform physical analysis of my robot design and justify my design decisions.</span>
+
+
+
 
 
 
@@ -104,7 +142,7 @@
                 </a>
               </li>
             </ul>
-            <p class="copyright text-muted">Copyright &copy; Alan Casallas 2017</p>
+            <p class="copyright text-muted">Copyright &copy; Alan Casallas 2019</p>
           </div>
         </div>
       </div>
