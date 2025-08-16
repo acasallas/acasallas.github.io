@@ -1,0 +1,51 @@
+/* Custom styles to override the default gray background */
+
+/* Change masthead background color */
+header.masthead {
+  background-color: #ffffff !important; /* White background */
+}
+
+/* Alternative colors you can use:
+   #f0f8ff - Light blue (Alice Blue)
+   #f5f5dc - Beige
+   #f0fff0 - Honeydew (light green)
+   #fff0f5 - Lavender blush (light pink)
+   #f8f8ff - Ghost white
+   #faf0e6 - Linen
+   #f5f5f5 - Light gray (lighter than default)
+   #ffffff - Pure white
+*/
+
+/* Remove the overlay completely for pure white background */
+header.masthead .overlay {
+  background-color: transparent !important; /* No overlay */
+}
+
+/* Change header text color to black for better contrast on white background */
+header.masthead .page-heading,
+header.masthead .post-heading,
+header.masthead .site-heading {
+  color: #000000 !important; /* Black text */
+}
+
+header.masthead .post-heading .meta a {
+  color: #000000 !important; /* Black text for meta links */
+}
+
+/* Fix navigation text visibility on white background */
+@media only screen and (min-width: 992px) {
+  #mainNav .navbar-brand {
+    color: #212529 !important; /* Dark text for brand */
+  }
+  #mainNav .navbar-brand:focus, 
+  #mainNav .navbar-brand:hover {
+    color: #0085A1 !important; /* Teal on hover */
+  }
+  #mainNav .navbar-nav > li.nav-item > a {
+    color: #212529 !important; /* Dark text for nav items */
+  }
+  #mainNav .navbar-nav > li.nav-item > a:focus, 
+  #mainNav .navbar-nav > li.nav-item > a:hover {
+    color: #0085A1 !important; /* Teal on hover */
+  }
+}
