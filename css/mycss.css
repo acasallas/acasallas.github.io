@@ -32,6 +32,15 @@ header.masthead .post-heading .meta a {
   color: #000000 !important; /* Black text for meta links */
 }
 
+/* Add underlines to links in the subheading section */
+.subheading a {
+  text-decoration: underline !important;
+}
+
+.subheading a:hover {
+  text-decoration: underline !important;
+}
+
 /* Fix navigation text visibility on white background */
 @media only screen and (min-width: 992px) {
   #mainNav .navbar-brand {
