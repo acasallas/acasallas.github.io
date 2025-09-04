@@ -65,7 +65,7 @@
         <div class="row">
           <div class="col-lg-8 col-md-10 mx-auto">
             <div class="page-heading">
-              <h1>CasaLLM: An LLM built from scratch.</h1>
+              <h1>CasaLLM: A 350M Parameter LLM.</h1>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@
       <p> Now available as a <a href="https://huggingface.co/spaces/alancasallas/casallm-ui">live demo</a>!
       <p> Please see the GitHub repo code <a href="https://github.com/acasallas/casallm">here</a></p>
       <h3>Motivation</h3>
-      <p> What is the most powerful LLM that a person can train on their own GPU with limited expense? This is the question I wanted to explore and which drove me to create a 350M parameter LLM in PyTorch. 
+      <p> What is the most powerful LLM that a person can train on a home GPU? This is the question I wanted to explore and which drove me to create a 350M parameter LLM in PyTorch. 
         Additionally, since I wanted to become intimately familiar with transformer architecture, not just for use in LLM's but also for its other widespread applications like regression and multimodal tasks, I coded the LLM from scratch.</p>
         <h3>Design</h3>
         <p>I started off coding a standard Transformer architecture with only causal masking and a typical cross entropy loss. It was fascinating understanding how an upper triangular matrix is used to enforce causal masking. For the pretraining, only causal masking was needed, as all input examples would be of context length size. I then implemented attention masking and loss masking for inputs of a smaller length than the context length. 
