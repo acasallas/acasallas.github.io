@@ -41,6 +41,44 @@ header.masthead .post-heading .meta a {
   text-decoration: underline !important;
 }
 
+/* Center images */
+.center-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Reduce header size for casallm report */
+.casallm-header .masthead {
+  padding-top: 50px !important;
+  padding-bottom: 20px !important;
+}
+
+.casallm-header .page-heading {
+  padding: 30px 0 20px !important;
+}
+
+.casallm-header .page-heading h1 {
+  font-size: 3.75rem !important;
+}
+
+/* General header spacing reduction for all pages */
+header.masthead .page-heading,
+header.masthead .post-heading,
+header.masthead .site-heading {
+  padding: 80px 0 30px !important;
+}
+
+/* Reduce space after header */
+header.masthead {
+  margin-bottom: 20px !important;
+}
+
+/* Add space above heading for homepage only */
+.homepage-header header.masthead .site-heading {
+  padding: 180px 0 30px !important;
+}
+
 /* Fix navigation text visibility on white background */
 @media only screen and (min-width: 992px) {
   #mainNav .navbar-brand {

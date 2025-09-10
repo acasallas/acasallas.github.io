@@ -26,7 +26,7 @@
 
   </head>
 
-  <body>
+  <body class="casallm-header">
 
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
@@ -65,7 +65,7 @@
         <div class="row">
           <div class="col-lg-8 col-md-10 mx-auto">
             <div class="page-heading">
-              <h1>CasaLLM: A 350M Parameter LLM.</h1>
+              <h1>CasaLLM: An LLM Built From Scratch.</h1>
             </div>
           </div>
         </div>
@@ -75,41 +75,37 @@
     <div class="col-lg-8 col-md-10 mx-auto">
     <span> 
       <p> Now available as a <a href="https://huggingface.co/spaces/alancasallas/casallm-ui">live demo</a>!
-      <p> Please see the GitHub repo code <a href="https://github.com/acasallas/casallm">here</a></p>
+      <p> GitHub repo is <a href="https://github.com/acasallas/casallm">here</a>.</p>
       <h3>Motivation</h3>
-      <p> What is the most powerful LLM that a person can train on a home GPU? This is the question I wanted to explore and which drove me to create a 350M parameter LLM in PyTorch. 
-        Additionally, since I wanted to become intimately familiar with transformer architecture, not just for use in LLM's but also for its other widespread applications like regression and multimodal tasks, I coded the LLM from scratch.</p>
+      <p> What is the most powerful LLM that can realistically be trained on a single 4090 GPU? That question led me to build a 350M-parameter model in PyTorch. I wanted to deeply understand transformer architecture, not just for LLMs but also for its broader uses in regression and multimodal systems, so I wrote the entire model from scratch. Along the way, I implemented key components such as causal masking, attention masking, loss masking, RoPE, embeddings, and KV caching directly from PyTorch primitives.</p>
         <h3>Design</h3>
-        <p>I started off coding a standard Transformer architecture with only causal masking and a typical cross entropy loss. It was fascinating understanding how an upper triangular matrix is used to enforce causal masking. For the pretraining, only causal masking was needed, as all input examples would be of context length size. I then implemented attention masking and loss masking for inputs of a smaller length than the context length. 
-          These variable-length inputs were common in the post training process</p>
-        <p>I also implemented RoPE embeddings, placing the RoPE vector transformation after the KQ linear projections in each attention head and before the attention dot product, just as specified in the RoPE paper. Lastly, I implemented kv caching. While kv caching is an inference time mechanism, I decided to include the logic for it in the model definition before training started, to avoid having to make any complicated architectural adjustments or weight transfers after training was done.</p>
-        <p>I tokenized the dataset using BPE via Huggingface's tokenizer library. Importantly, I added the special tokens that would be used for conversation templates to the tokenizer beforehand.</p>
-        <p>I followed the Transformer architecture sizing and training hyperparameters laid out in the GPT-3 paper. I chose a context length of 2048, which meant a batch size of around 256 samples. Such a batch size would be far too large for my 24GB VRAM GPU, so using gradient accumulation I used an effective batch size of 4 samples. With this batch size, I was able to fit a 350M parameter model in GPU, which corresponds to the GPT-Medium size in the GPT-3 paper.</p>
+        <p>The model was pretrained on the 10B token sampling of the FineWebEdu dataset. I followed the Transformer architecture sizing and hyperparameters laid out in the GPT-3 paper. I chose a context length of 2048, which meant a batch size of around 256 samples. Such a batch size would be far too large for my 24GB VRAM GPU, so using gradient accumulation I used an effective batch size of 4 samples. With this batch size, I was able to fit a 350M parameter model in GPU, which corresponds to the GPT-Medium size in the paper.</p>
         <h3>Training</h3>
         <p>After implementing all common optimizations such as the use of tf32, bf16, torch compile, and Flash Attention. Since I pre-tokenized the training corpus before starting training, I managed to achieve 100% gpu util as measured by nvidia-smi, leaving me with a training throughput of 30,000 tokens/sec. I was able to further improve training speed after realizing the PyTorch function torch.nn.functional.scaled_dot_product_attention (which is PyTorch's implementation of Flash Attention) skips the fast path if an attention mask is set! 
-          I thus put a conditional statement in my transformer architecture that did not pass an attention mask (but rather only a causal mask) into the Flash Attention function during pretraining, which allowed it to activate the fast path during pretraining and reach a training speed of 50,000 tokens/sec. Pretraining was held over a single epoch of a 10B token sampling of the FinewebEdu dataset, completing in 55 hours. 
+          I thus put a conditional statement in my transformer architecture that did not pass an attention mask (but rather only a causal mask) into the Flash Attention function during pretraining, which allowed it to activate the fast path during pretraining and reach a training speed of 50,000 tokens/sec. The learning schedule used cosine annealing with linear warmup and a maximum learning rate of 3e-4. Pretraining completed in 55 hours. 
           The wandb plots are shown below.</p>
-          <img src="img/casallm_pretraining.png" height="300">
-          <p>todo: discuss the plot, especially fuzziness during training. After pretraining was done, I played with the model and found that when asked a question it did not respond, but rather rambled on with its own (sometimes unrelated) thoughts.</p>
-        <p>I then performed supervised fine-tuning. I used a combination of the ultrachat-200k dataset (samled down to 50k examples) along with the 50k sample yahma/alpaca-cleaned dataset, for a total of 100k examples. All samples were formatted according the conversation template that I selected before tokenization. I was careful to clean the dataset of any samples which maight cause the LLM to incorrectly identify itself as ChatGPT, Gemini, or any other LLM. 
-          I also injected my own conversation samples to make sure my model would respond appropriately to greetings as well as to self-identifcation questions such as "who are you?" and "who made you?".</p>
+          <img src="img/casallm_pretraining.png" height="300" class="center-image">
+          <p>After pretraining, I ran some test generations and found that, as expected at that point, when asked a question it did not respond directly, but rather rambled on with its own (sometimes unrelated) thoughts.</p>
+        <p>I then performed supervised fine-tuning. I used a combination of the ultrachat-200k dataset (sampled down to 50k examples) along with the 50k sample yahma/alpaca-cleaned dataset, for a total of 100k examples. All samples were formatted according to the conversation template that I selected before tokenization. I was careful to clean the dataset of any samples which might cause the LLM to incorrectly identify itself as ChatGPT, Gemini, or any other LLM. 
+          I also injected my own conversation samples to make sure my model would respond appropriately to greetings as well as to self-identification questions such as "who are you?" and "who made you?".</p>
         <p>Fine-tuning was performed for 3 epochs of 100,000 samples using a learning schedule of cosine annealing with linear warmup with a max learning rate of 10% what the pretraining learning rate was. As can be seen from the plots below, training loss was very noisy because the training samples were of very varied length. Shorter samples especially will exhibit a large variance in loss. However, I was encouraged by the monotonically decreasing curve of the validation loss.</p>
-        <img src="img/casallm_sft.png" height="300">
-        <p>Once fine-tuning was complete, it was ready to act as a chatbot, so I wrote an application to deploy on Huggingface spaces. In the application, when a message is submitted, the entire conversation is tokenized and input into the transformer to produce the first token and fill the kv caches (prefilling), after which the kv cache is used to generate each subsequent token (decoding), which is why the first token can take longest to generate in the live demo. 
-          In the current application, every time a user submits a new message the prefill process must be started from scratch. Saving kv caches from one message submission to the next is a possible next step for my application. Other features that could be implemented include saving user conversations and implementing summarization techniques for when a conversation exceeds the context length.</p>
+        <img src="img/casallm_sft.png" height="300" class="center-image">
+        <h3>Results</h3>
+        <p>Once fine-tuning was complete, it was ready to act as a chatbot, so I wrote an application to deploy on Huggingface spaces. </p>
+          <img src="img/who_are_you.png" height="300" class="center-image">
+          <p>In the application, when a message is submitted, the entire conversation is tokenized and input into the transformer to produce the first token and fill the kv caches (prefilling), after which the kv cache is used to generate each subsequent token (decoding), which is why the first token can take longest to generate in the live demo. 
+            In the current application, every time a user submits a new message the prefill process must be started from scratch. Saving kv caches from one message submission to the next is a possible next step for my application. Other features that could be implemented include saving user conversations and implementing summarization techniques for when a conversation exceeds the context length.</p>
           
-          <h3>Results</h3>
-          <p>In the end, I was satisifed with the performance of the model. It correctly identifies itself as CasaLLM and gives responses that show a good degree of correspondance to the question asked.</p>
-          <img src="img/who_are_you.png" height="300">
+          <p>In the end, I was satisfied with the performance of the model. It correctly identifies itself as CasaLLM and gives responses that correlate well to questions asked.</p>
+          
 
-          <p>Nevertheless, as a 350M parameter model, it is nowhere as coherent as a larger model like the first ChatGPT was. The image below shows an example of a hallucination, which are common in this model. 
+          <p>Nevertheless, as a 350M parameter model, it is nowhere as coherent as a larger model like the first ChatGPT was. The image below shows an example of a hallucination, which is common in this model. 
             In the screenshot, the model describes Alpha Centauri, incorrectly referring to it as the 'Algae Star' (there is no such thing) and incorrectly saying it is a white dwarf.</p>
 
-          <img src="img/of_all_the_stars.png" height="300">
+          <img src="img/of_all_the_stars.png" height="300" class="center-image">
             
-           <p>The best step to create a more coherent model would be simply to train a larger one. 
-            In fact, since training a 350M parameter model on my GPU was possible in less than 3 days with a micro batch size of 4, it is likely possible to train a 1G param or larger model over 12 days (a larger training corpus would be advised).
-          OpenAI noted that a lot of emergent behavior starts to appear when a model reaches 1 GB in size, and I may be inclined to train a larger model in the near future.</p>
+           <p>The best step to create a more coherent model would be simply to train a larger one. In fact, I tested how fast larger LLM's could train on my GPU and found that I would be able to pretrain a 750M model in 9 days, and a 1.2G model in 28 days (with gradient checkpointing). 
+            OpenAI noted that a lot of emergent behavior begins to appear as a model approaches and exceeds 1G parameters, and I may be inclined to train a larger model in the near future.</p>
 
         
         
@@ -125,43 +121,7 @@
 
 
 
-    <hr>
 
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 col-md-10 mx-auto">
-            <ul class="list-inline text-center">
-              <li class="list-inline-item">
-                <a href="https://www.facebook.com/alan.casallas.7">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://github.com/acasallas">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://www.linkedin.com/in/alancasallas/">
-                <span class="fa-stack fa-lg">
-                  <i class="fa fa-circle fa-stack-2x"></i>
-                  <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </footer>
 
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>

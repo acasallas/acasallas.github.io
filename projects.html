@@ -139,10 +139,12 @@
             <h2>Master's Thesis: Contactless Current and Voltage Detector</h2>
             <span class="project-date">August 2019</span>
             <img src="img/ccspic.png" height="200" class="projectimg">
-            <p>For my Master's thesis at MIT, I developed a contactless current and voltage detector. The current detector used an array of magnetic field point measurements, rather than a hall effect sensor, to reduce hardware cost. I developed algorithms to deal with magnetic field interference from nearby wires, effectively replacing the hardware of a hall effect sensor with interference-rejection algorithms. I used techniques such as Polynomial Regression, Generalized Least Squares, Autoencoders, and Digital Signal Processing.</p>
+            <p>For my Master's thesis at MIT, I developed a contactless detector that used signal processing and machine learning to infer current and voltage levels in a set of cables. 
+              The goal was to replace expensive Hall Effect Sensors with inexpensive magnetic field point measurement sensors, and to use algorithmic methods to remove interference from external sources of magnetic fields.
+              Methods that were applied to the problem included Autoencoder Neural Networks, Linear Regression, Polynomial Regression, non-linear solvers, and Generalized Least Squares.
+            See the <a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=okubTQQAAAAJ&citation_for_view=okubTQQAAAAJ:u5HHmVD_uO8C">full thesis</a>.</p>
             <span><i>US Patent No. 12085591</i></span>
             <br/>
-            <span>[<a href="https://scholar.google.com/citations?view_op=view_citation&hl=en&user=okubTQQAAAAJ&citation_for_view=okubTQQAAAAJ:u5HHmVD_uO8C">Full Thesis</a>]</span>
           </div>
 
           <hr>
@@ -156,7 +158,11 @@
           <div class="project-item">
             <h2>DropAlan: A Novel Dropout Variant</h2>
             <span class="project-date">December 2018</span>
-            <p>For my 6.860 (Statistical Learning) final project, I designed a new form of dropout. TODO put more here.</p>
+            <p>For my 6.860 (Statistical Learning) final project, I developed a new dropout variant called DropAlan. Instead of pairing traditional activation functions with standard dropout, DropAlan directly assigns each neuron a dropout probability based on its input values. 
+              In expectation, this mimics the behavior of ReLU activations while avoiding issues like dead ReLUs and making the method easier to analyze theoretically.
+              Tested on MNIST and CIFAR-10, it achieved similar accuracy to traditional dropout while converging as much as 20% faster. 
+              See the <a href="dropalan.pdf">full report</a>.
+            </p>
           </div>
 
           <hr>
@@ -165,10 +171,11 @@
             <h2>OCR System</h2>
             <span class="project-date">May 2017</span>
             <img src="img/ocrpic.png" height="180" class="projectimg">
-            <p>For my 6.869 (Computer Vision) final project, I designed an Optical Character Recognition system. I worked with a partner, Andrew Montanez. In this project, we trained a VGG-16 variant CNN to classify a letters in an image. Candidate image sections were isolated for classification using edge-detection techniques with the help of the OpenCV library. TODO link the report.</p>
+            <p>For my 6.869 (Computer Vision) final project, I designed an Optical Character Recognition system. I worked with a partner, Andrew Montanez. 
+              In this project, we trained a VGG-16 variant CNN to classify letters in an image. Candidate image sections were isolated for classification using edge-detection techniques with the help of the OpenCV library.</p>
           </div>
 
-          <hr>
+          <!--hr-->
 
           <!--div class="project-item">
             <h2>Relay Racecar</h2>
@@ -200,47 +207,6 @@
     </div>
 
 
-
-
-
-
-    <hr>
-
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-10 col-md-12 mx-auto">
-            <ul class="list-inline text-center">
-              <li class="list-inline-item">
-                <a href="https://www.facebook.com/alan.casallas.7">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://github.com/acasallas">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://www.linkedin.com/in/alancasallas/">
-                <span class="fa-stack fa-lg">
-                  <i class="fa fa-circle fa-stack-2x"></i>
-                  <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </footer>
 
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>

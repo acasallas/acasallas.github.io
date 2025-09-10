@@ -26,7 +26,7 @@
 
   </head>
 
-  <body>
+  <body class="casallm-header">
 
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
@@ -74,72 +74,37 @@
 
     <div class="col-lg-8 col-md-10 mx-auto">
     <p>
-      Please see the <a href="https://github.com/acasallas/clip-ablation-study">GitHub Repo.</a>
+    The Github repo is found <a href="https://github.com/acasallas/clip-ablation-study">here</a>.
     </p>
 
     <h3>Motivation</h3>
     <p>
-      I created a custom implementation of CLIP. I did both to explore what effect replacing a transformer with an RNN would have as the text encoder, as well as to explore how rich embeddings trained on a home GPU (Nvidia 4090) could be. 
+      What type of CLIP implementation can be trained on a single 4090 GPU? That question motivated me to replicate OpenAI’s CLIP system (published in 2021), which learns joint embeddings of images and text captions using contrastive learning.
+      I also decided to use an RNN as the text encoder rather than the traditional Transformer, to test whether an RNN would be better able to handle the short, simple captions typical of CLIP datasets.
   </p>
-  <p>The training set I chose was pixparse/cc3m-wds. I chose this training set because its text descriptions are in English, in fairly simple and descriptive sentences.
-    It was a much cleaner dataset than others I analyzed, such as mlfoundations/datacomp, whose text was in many different languages and often not fully descriptive of the associated image.
+  <p>For training, I chose pixparse/cc3m-wds because its captions are in English, relatively clean, and usually descriptive. Other datasets I looked at, like mlfoundations/datacomp, had noisier captions, often in multiple languages, or even just filenames like IMG_20220523.jpg.
   </p>
-  <img src="img/cc3m_dataset.png" height="300">
-  <p>To keep my parameter count down, I downsampled and cropped images to 128x128 pixels, but kept color channels.</p>
-  <p>When OpenAI trained CLIP, their smallest model was trained with a batch size of 32,768. In many deep learning problems, the loss function is an average of each individual sample's loss with respect to a true answer, and so to achieve a large effective batch size, it is possible to calculate loss for a smaller "micro batch" of samples and simply sum the results to calculate the loss for a larger effective batch. In CLIP however, the loss is not an average of individual samples, but rather is contrastive in nature and is thus a comparison of each pair of samples, making it less obvious how to calculate the loss for a large effective batch.</p>
-  <img src="img/clip_loss.png" height="100">
+  <img src="img/cc3m_dataset.png" height="300" class="center-image">
+  <p>To keep the parameter count down, I downsampled and cropped images to 128×128 pixels (keeping color channels). The image encoder was a ResNet-34 CNN, while the text encoder was a two-layer bidirectional RNN with hidden size 256. Both image and text embeddings were 512-dimensional.</p>
+  <p>When OpenAI trained CLIP, their smallest model was trained with a batch size of 32,768. In contrast, with the 24 GB of VRAM in my 4090 GPU, I was able to fit a batch size of 2048 samples.
+      </p>
+  <img src="img/clip_loss.png" height="100" class="center-image">
   <h3>Training</h3>
-  <p>With my model and data setup, I was able to fit a 2048 sample batch size in my GPU. To try to achieve a larger effective batch size, I implemented an XBM queue of size 2048, saving the most recent embeddings in the queue so they could be appended to the 256 items in the current batch for loss calculation.</p>
-  <p>Intially when I began training with this setup, the network failed to learn, even after trying a variety of learning rates. The network only started to learn after I removed the XBM queue. It appears that having an XBM queue made it difficult for my network to learn, either due to the sheer size of the embeddings, or, more likely, because the network was not responding well to having stale embeddings in its loss function. Once I removed the XBM queue, the network started to learn, as can be seen from the wandb plots below.</p> 
+  <p>In many deep learning tasks, the loss is just the average of per-sample losses, so you can simulate larger batches by summing over micro-batches. 
+    However CLIP uses a contrastive loss which compares every image–text pair in the batch, making it less obvious how to scale effective batch size.
+    To push the limit, I implemented an XBM queue of size 2048. This stored recent embeddings and appended them to the current 256-sample batch for loss computation.</p>
+  <p>At first, the network completely failed to learn, no matter the learning rate. It only began to improve after I removed the XBM queue. My guess is that stale embeddings in the queue hurt training more than the larger effective batch size helped. Once removed, training stabilized and the loss decreased (see the wandb plots below).</p> 
   
-  <img src="img/clip_training.png" height="400">
-  <p>While all training from this point on was done without the XBM queue, a path for further experimentation could be to gradually introduce an increasingly large XBM queue after training loss has started to decrease or plateau. 
-    Another alternative is to use a similar technique as MoCo, which keeps two networks, one that is trained, and another that is used to generate embeddings and is smoothed with an ema of parameters.</p>
+  <img src="img/clip_training.png" height="400" class="center-image">
+  <p>Future directions could include reintroducing the XBM queue gradually, only after the loss starts to drop or plateau. Another idea would be to use the technique publised in the MoCo paper, in which the network is trained while using a momentum-averaged copy of the network to produce queue embeddings.</p>
     <h3>Results</h3>
-  <p>As can be seen from the wandb results, the validation accuracy reached 13% and 16% for text and image embedding accuracy, respectivley. 
-    Since a batch size of 2048 would have a random untrained accuracy of 0.04%, it is evident the model learned to associate image and text embeddings.
-  To test the limits of the embeddings, I used them to try to classify the 1000-class Imagenet dataset using the same procedure OpeanAI did, that is, creating a sentence such as "this is a picture of {}" and inserting the imagenet class name in the sentence.
-  Top-1 Imagenet accuracy was 8.3% and Top-5 accuracy was 19.6%. The somewhat disappointing performance is understandable because ImageNet labels are somewhat non-descriptive and esoteric (labels include 'agaric' and 'gyromitra', words I myself do not konw the meaning of).
-To attempt to give the model a chance to improve performance, I had LLM's generate a simple worded one sentence description of each label (for example, the sentence for agaric became "agaric is a type of mushroom with gills." However, even with this prompt engineering, zero-shot performance on Imagenet remained low, at 6.7% and 18.8% top-1 and top-5 accuracy, respectively.</p>
-<p>Nevertheless, I was happy to see the model learn embeddings well above random levels and attribute its less than state-of-art performance to the small model size, small training set size, and the experimental use of an RNN as the text encoder. If my goal was to improve performance using the same hardware setup, my first next steps would be to train on more data (a 12M version of cc3m is available) and to switch to a transformer as the text encoder.</p>
+  <p>On validation, the model reached 13% text accuracy and 16% image accuracy. Given that random chance with batch size 2048 would yield only ~0.04%, the model clearly learned meaningful associations between images and captions.
+    To test zero-shot performance, I tried ImageNet classification using the same trick as OpenAI: prompts like “this is a picture of {label}.” The results: 8.3% top-1 accuracy and 19.6% top-5 accuracy. These results weren't as great as I hoped for, but they were not surprising considering ImageNet labels are often obscure, containing labels such as “agaric” and “gyromitra”, which even I had to look up.
+  </p>
+  <p>I also tried some light prompt engineering by asking LLMs to generate simple full sentence descriptions of the ImageNet labels (e.g., “agaric is a type of mushroom with gills”). But even then, accuracy only shifted to 6.7% top-1 and 18.8% top-5.</p>
+<p>Nevertheless, I was happy to see the model learn embeddings well above random levels and attribute its less than state-of-art performance to the small model size, small training set size, and the experimental use of an RNN as the text encoder. If I continue exploring how to improve performance using the same hardware setup, my first next steps would be to train on more data (a 12M version of cc3m is available) and to switch to a Transformer as the text encoder.</p>
 
-    <hr>
 
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 col-md-10 mx-auto">
-            <ul class="list-inline text-center">
-              <li class="list-inline-item">
-                <a href="https://www.facebook.com/alan.casallas.7">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://github.com/acasallas">
-                  <span class="fa-stack fa-lg">
-                    <i class="fa fa-circle fa-stack-2x"></i>
-                    <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a href="https://www.linkedin.com/in/alancasallas/">
-                <span class="fa-stack fa-lg">
-                  <i class="fa fa-circle fa-stack-2x"></i>
-                  <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-                </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </footer>
 
     <!-- Bootstrap core JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>
