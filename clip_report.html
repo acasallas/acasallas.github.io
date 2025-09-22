@@ -79,14 +79,14 @@
 
     <h3>Motivation</h3>
     <p>
-      What type of CLIP implementation can be trained on a single 4090 GPU? That question motivated me to replicate OpenAI’s CLIP system (published in 2021), which learns joint embeddings of images and text captions using contrastive learning.
+      What type of CLIP implementation can be trained on a single GPU? That question motivated me to replicate OpenAI’s CLIP system (published in 2021), which learns joint embeddings of images and text captions using contrastive learning.
       I also decided to use an RNN as the text encoder rather than the traditional Transformer, to test whether an RNN would be better able to handle the short, simple captions typical of CLIP datasets.
   </p>
   <p>For training, I chose pixparse/cc3m-wds because its captions are in English, relatively clean, and usually descriptive. Other datasets I looked at, like mlfoundations/datacomp, had noisier captions, often in multiple languages, or even just filenames like IMG_20220523.jpg.
   </p>
   <img src="img/cc3m_dataset.png" height="300" class="center-image">
   <p>To keep the parameter count down, I downsampled and cropped images to 128×128 pixels (keeping color channels). The image encoder was a ResNet-34 CNN, while the text encoder was a two-layer bidirectional RNN with hidden size 256. Both image and text embeddings were 512-dimensional.</p>
-  <p>When OpenAI trained CLIP, their smallest model was trained with a batch size of 32,768. In contrast, with the 24 GB of VRAM in my 4090 GPU, I was able to fit a batch size of 2048 samples.
+  <p>When OpenAI trained CLIP, their smallest model was trained with a batch size of 32,768. In contrast, with the 24 GB of VRAM in my GPU, I was able to fit a batch size of 2048 samples.
       </p>
   <img src="img/clip_loss.png" height="100" class="center-image">
   <h3>Training</h3>
